@@ -72,22 +72,22 @@ export class NodeLoader{
 				Potree.workerPool.returnWorker(workerPath, worker);
 
 				let geometry = new THREE.BufferGeometry();
-				
+
 				for(let property in buffers){
 
 					let buffer = buffers[property].buffer;
 
 					if(property === "position"){
-						geometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}else if(property === "rgba"){
-						geometry.addAttribute('rgba', new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
+						geometry.setAttribute('rgba', new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
 					}else if(property === "NORMAL"){
-						//geometry.addAttribute('rgba', new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
-						geometry.addAttribute('normal', new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						//geometry.setAttribute('rgba', new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
+						geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}else if (property === "INDICES") {
 						let bufferAttribute = new THREE.BufferAttribute(new Uint8Array(buffer), 4);
 						bufferAttribute.normalized = true;
-						geometry.addAttribute('indices', bufferAttribute);
+						geometry.setAttribute('indices', bufferAttribute);
 					}else{
 						const bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
 
@@ -99,7 +99,7 @@ export class NodeLoader{
 							range: batchAttribute.range,
 						};
 
-						geometry.addAttribute(property, bufferAttribute);
+						geometry.setAttribute(property, bufferAttribute);
 					}
 
 				}
@@ -186,12 +186,12 @@ export class NodeLoader{
 				current.hierarchyByteSize = byteSize;
 				current.numPoints = numPoints;
 			}else{
-				// load real node 
+				// load real node
 				current.byteOffset = byteOffset;
 				current.byteSize = byteSize;
 				current.numPoints = numPoints;
 			}
-			
+
 			current.nodeType = type;
 
 			if(current.nodeType === 2){
@@ -238,7 +238,7 @@ export class NodeLoader{
 
 		let {hierarchyByteOffset, hierarchyByteSize} = node;
 		let hierarchyPath = `${this.url}/../hierarchy.bin`;
-		
+
 		let first = hierarchyByteOffset;
 		let last = first + hierarchyByteSize - 1n;
 
@@ -267,13 +267,13 @@ export class NodeLoader{
 		// 			requestAnimationFrame(repeatUntilDone);
 		// 		}
 		// 	};
-			
+
 		// 	repeatUntilDone();
 		// });
 
 		// await promise;
 
-		
+
 
 
 
@@ -298,7 +298,7 @@ function createChildAABB(aabb, index){
 	} else {
 		max.y -= size.y / 2;
 	}
-	
+
 	if ((index & 0b0100) > 0) {
 		min.x += size.x / 2;
 	} else {
@@ -345,7 +345,7 @@ export class OctreeLoader{
 			}else{
 				attribute.range = [min, max];
 			}
-			
+
 			attribute.initialRange = attribute.range;
 
 			attributes.add(attribute);
@@ -353,7 +353,7 @@ export class OctreeLoader{
 
 		{
 			// check if it has normals
-			let hasNormals = 
+			let hasNormals =
 				attributes.attributes.find(a => a.name === "NormalX") !== undefined &&
 				attributes.attributes.find(a => a.name === "NormalY") !== undefined &&
 				attributes.attributes.find(a => a.name === "NormalZ") !== undefined;

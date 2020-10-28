@@ -20,7 +20,7 @@ export class VRControlls{
 
 		this.snLeft = this.createControllerModel();
 		this.snRight = this.createControllerModel();
-		
+
 		this.viewer.scene.scene.add(this.snLeft.node);
 		this.viewer.scene.scene.add(this.snRight.node);
 		//this.viewer.scene.scene.add(this.snLeft.debug);
@@ -58,7 +58,7 @@ export class VRControlls{
 		const color = 0xffff00;
 
 		const indices = new Uint16Array( [ 0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 ] );
-		const positions = [ 
+		const positions = [
 			1, 1, 1,
 			0, 1, 1,
 			0, 0, 1,
@@ -71,7 +71,7 @@ export class VRControlls{
 		const geometry = new THREE.BufferGeometry();
 
 		geometry.setIndex( new THREE.BufferAttribute( indices, 1 ) );
-		geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+		geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
 
 		geometry.computeBoundingSphere();
 
@@ -144,7 +144,7 @@ export class VRControlls{
 
 		const I = [];
 		for(const pointcloud of pointclouds){
-			
+
 			const intersects = pointcloud.intersectsPoint(position);
 
 			if(intersects){
@@ -167,7 +167,7 @@ export class VRControlls{
 		const copy = {
 			axes: axes,
 			buttons: buttons,
-			pose: pose, 
+			pose: pose,
 			hand: pad.hand,
 			index: pad.index,
 		};
@@ -213,7 +213,7 @@ export class VRControlls{
 		const gamepads = Array.from(navigator.getGamepads()).filter(p => p !== null).map(this.copyPad);
 
 		const getPad = (list, pattern) => list.find(pad => pad.index === pattern.index);
-		
+
 		if(this.previousPads.length !== gamepads.length){
 			this.previousPads = gamepads;
 		}
@@ -309,7 +309,7 @@ export class VRControlls{
 			const pad = justTriggered[0];
 			const position = toScene(new THREE.Vector3(...pad.pose.position));
 			const I = this.getPointcloudsAt(pointclouds, position);
-			
+
 			if(I.length > 0){
 				selection.length = 0;
 				selection.push(I[0]);
@@ -319,7 +319,7 @@ export class VRControlls{
 			const pad = justTriggered[0];
 			const position = toScene(new THREE.Vector3(...pad.pose.position));
 			const I = this.getPointcloudsAt(pointclouds, position);
-			
+
 			if(I.length > 0){
 				selection.length = 0;
 				selection.push(I[0]);
@@ -345,16 +345,16 @@ export class VRControlls{
 			// STOP SCALE/ROTATE
 			this.scaleState = null;
 		}
-		
+
 		if(this.scaleState){
 			// SCALE/ROTATE
 
 			const {first, second, pointclouds} = this.scaleState;
 
 			if(pointclouds.length > 0){
-				
+
 				const pointcloud = pointclouds[0];
-				
+
 				const p1Start = toScene(new THREE.Vector3(...first.pose.position));
 				const p2Start = toScene(new THREE.Vector3(...second.pose.position));
 
@@ -374,7 +374,7 @@ export class VRControlls{
 				sign = sign === 0 ? 1 : sign;
 				const angle = sign * diffStartG.angleTo(diffEndG);
 				const newAngle = pointcloud.rotation.z + angle;
-				
+
 				// SCALE
 				const scale = diffEnd.length() / diffStart.length();
 				const newScale = pointcloud.scale.clone().multiplyScalar(scale);
@@ -384,7 +384,7 @@ export class VRControlls{
 				p1ToP.multiplyScalar(scale);
 				p1ToP.applyAxisAngle(new THREE.Vector3(0, 0, 1), angle);
 				const newPosition = p1End.clone().add(p1ToP);
-				
+
 				//this.debugLine(pointcloud.position, newPosition, 0, 0xFF0000);
 
 				//console.log(newScale, p1ToP, angle);
@@ -401,15 +401,15 @@ export class VRControlls{
 			}
 
 		}
-		
+
 		if(triggered.length === 1){
 			// TRANSLATE POINT CLOUDS
 			const pad = triggered[0];
 			const prev = this.previousPad(pad);
 
 			const flipWorld = new THREE.Matrix4().fromArray([
-					1, 0, 0, 0, 
-					0, 0, 1, 0, 
+					1, 0, 0, 0,
+					0, 0, 1, 0,
 					0, -1, 0, 0,
 					0, 0, 0, 1
 				]);
@@ -433,12 +433,12 @@ export class VRControlls{
 				pc.position.add(diff);
 			}
 		}
-	
+
 		{ // MOVE WITH JOYSTICK
 
 			const flipWorld = new THREE.Matrix4().fromArray([
-				1, 0, 0, 0, 
-				0, 0, 1, 0, 
+				1, 0, 0, 0,
+				0, 0, 1, 0,
 				0, -1, 0, 0,
 				0, 0, 0, 1
 			]);
@@ -452,7 +452,7 @@ export class VRControlls{
 				const rotation = new THREE.Quaternion(...pad.pose.orientation);
 				const d = new THREE.Vector3(0, 0, -1);
 				d.applyQuaternion(rotation);
-				
+
 				const worldPos = toScene(opos);
 				const worldTarget = toScene(new THREE.Vector3().addVectors(opos, d));
 				const dir = new THREE.Vector3().subVectors(worldTarget, worldPos).normalize();
@@ -494,7 +494,7 @@ export class VRControlls{
 
 			// for(const pad of [left, right].filter(pad => pad)){
 
-				
+
 
 			// 	moves.push(move);
 
@@ -512,7 +512,7 @@ export class VRControlls{
 			// 	const mMain = main.length();
 
 
-			// 	let mAdjust = 
+			// 	let mAdjust =
 
 
 
@@ -544,7 +544,7 @@ export class VRControlls{
 			// 		const rotation = new THREE.Quaternion(...pad.pose.orientation);
 			// 		const d = new THREE.Vector3(0, 0, -1);
 			// 		d.applyQuaternion(rotation);
-					
+
 			// 		const worldPos = toScene(opos);
 			// 		const worldTarget = toScene(new THREE.Vector3().addVectors(opos, d));
 			// 		const dir = new THREE.Vector3().subVectors(worldTarget, worldPos).normalize();
@@ -585,7 +585,7 @@ export class VRControlls{
 				const {node, debug} = snRight;
 				const opos = new THREE.Vector3(...right.pose.position);
 				const position = toScene(opos);
-				
+
 				const rotation = new THREE.Quaternion(...right.pose.orientation);
 				const d = new THREE.Vector3(0, 0, -1);
 				d.applyQuaternion(rotation);
@@ -593,10 +593,10 @@ export class VRControlls{
 
 				node.position.copy(position);
 			}
-			
+
 			if(left){
 				const {node, debug} = snLeft;
-				
+
 				const position = toScene(new THREE.Vector3(...left.pose.position));
 				node.position.copy(position);
 			}

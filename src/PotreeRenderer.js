@@ -280,7 +280,7 @@ class Shader {
 			}
 
 			// uniform blocks
-			if(gl instanceof WebGL2RenderingContext){ 
+			if(gl instanceof WebGL2RenderingContext){
 				let numBlocks = gl.getProgramParameter(program, gl.ACTIVE_UNIFORM_BLOCKS);
 
 				for (let i = 0; i < numBlocks; i++) {
@@ -293,7 +293,7 @@ class Shader {
 					gl.uniformBlockBinding(program, blockIndex, blockIndex);
 					let dataSize = gl.getActiveUniformBlockParameter(program, blockIndex, gl.UNIFORM_BLOCK_DATA_SIZE);
 
-					let uBuffer = gl.createBuffer();	
+					let uBuffer = gl.createBuffer();
 					gl.bindBuffer(gl.UNIFORM_BUFFER, uBuffer);
 					gl.bufferData(gl.UNIFORM_BUFFER, dataSize, gl.DYNAMIC_READ);
 
@@ -656,7 +656,7 @@ export class Renderer {
 				//attributeLocation = attributeLocations["aExtra"];
 			}else{
 				let attributeLocation = attributeLocations[attributeName].location;
-				
+
 				gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
 				gl.enableVertexAttribArray(attributeLocation);
 			}
@@ -910,9 +910,9 @@ export class Renderer {
 				let uFilterReturnNumberRange = material.uniforms.uFilterReturnNumberRange.value;
 				let uFilterNumberOfReturnsRange = material.uniforms.uFilterNumberOfReturnsRange.value;
 				let uFilterPointSourceIDClipRange = material.uniforms.uFilterPointSourceIDClipRange.value;
-				
-				
-				
+
+
+
 				shader.setUniform2f("uFilterReturnNumberRange", uFilterReturnNumberRange);
 				shader.setUniform2f("uFilterNumberOfReturnsRange", uFilterNumberOfReturnsRange);
 				shader.setUniform2f("uFilterPointSourceIDClipRange", uFilterPointSourceIDClipRange);
@@ -946,7 +946,7 @@ export class Renderer {
 				for(const attributeName in geometry.attributes){
 					const bufferAttribute = geometry.attributes[attributeName];
 					const vbo = webglBuffer.vbos.get(attributeName);
-					
+
 					gl.bindBuffer(gl.ARRAY_BUFFER, vbo.handle);
 					gl.disableVertexAttribArray(attributeLocation);
 				}
@@ -990,7 +990,7 @@ export class Renderer {
 					let offset = -(globalRange[0] - initialRange[0]) / initialRangeSize;
 
 					shader.setUniform1f("uExtraScale", scale);
-					shader.setUniform1f("uExtraOffset", offset);					
+					shader.setUniform1f("uExtraOffset", offset);
 				}
 
 			}else{
@@ -1005,11 +1005,11 @@ export class Renderer {
 
 						let type = this.glTypeMapping.get(bufferAttribute.array.constructor);
 						let normalized = bufferAttribute.normalized;
-						
+
 						gl.bindBuffer(gl.ARRAY_BUFFER, vbo.handle);
 						gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
 						gl.enableVertexAttribArray(attributeLocation);
-						
+
 					}
 				}
 			}
@@ -1196,7 +1196,7 @@ export class Renderer {
 			 }else{
 				 gl.depthMask(false);
 			 }
-			 
+
 		}
 
 
@@ -1214,10 +1214,10 @@ export class Renderer {
 			shader.setUniform1f("fov", Math.PI * camera.fov / 180);
 			shader.setUniform1f("near", camera.near);
 			shader.setUniform1f("far", camera.far);
-			
+
 			if(camera instanceof THREE.OrthographicCamera){
 				shader.setUniform("uUseOrthographicCamera", true);
-				shader.setUniform("uOrthoWidth", camera.right - camera.left); 
+				shader.setUniform("uOrthoWidth", camera.right - camera.left);
 				shader.setUniform("uOrthoHeight", camera.top - camera.bottom);
 			}else{
 				shader.setUniform("uUseOrthographicCamera", false);
@@ -1265,7 +1265,7 @@ export class Renderer {
 
 				const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
 				gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
-				
+
 				//const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
 				//gl.uniformMatrix4fv(lClipSpheres, false, material.uniforms.clipSpheres.value);
 			}
@@ -1291,14 +1291,14 @@ export class Renderer {
 
 
 			shader.setUniform3f("uIntensity_gbc", [
-				material.intensityGamma, 
-				material.intensityBrightness, 
+				material.intensityGamma,
+				material.intensityBrightness,
 				material.intensityContrast
 			]);
 
 			shader.setUniform3f("uRGB_gbc", [
-				material.rgbGamma, 
-				material.rgbBrightness, 
+				material.rgbGamma,
+				material.rgbBrightness,
 				material.rgbContrast
 			]);
 
@@ -1424,7 +1424,7 @@ export class Renderer {
 
 		const gl = this.gl;
 
-		// PREPARE 
+		// PREPARE
 		if (target != null) {
 			this.threeRenderer.setRenderTarget(target);
 		}

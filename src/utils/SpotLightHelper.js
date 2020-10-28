@@ -20,7 +20,7 @@ export class SpotLightHelper extends THREE.Object3D{
 		}
 
 		{ // LINES
-			
+
 
 			let positions = new Float32Array([
 				+0, +0, +0,     +0, +0, -1,
@@ -37,7 +37,7 @@ export class SpotLightHelper extends THREE.Object3D{
 			]);
 
 			let geometry = new THREE.BufferGeometry();
-			geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
+			geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
 			let material = new THREE.LineBasicMaterial();
 
@@ -60,7 +60,7 @@ export class SpotLightHelper extends THREE.Object3D{
 		//	new THREE.Vector3().subVectors(light.position, this.light.getWorldDirection(new THREE.Vector3())));
 		let target = new THREE.Vector3().addVectors(
 			light.position, this.light.getWorldDirection(new THREE.Vector3()).multiplyScalar(-1));
-		
+
 		let quat = new THREE.Quaternion().setFromRotationMatrix(
 			new THREE.Matrix4().lookAt( position, target, new THREE.Vector3( 0, 0, 1 ) )
 		);
@@ -73,7 +73,7 @@ export class SpotLightHelper extends THREE.Object3D{
 		let coneWidth = coneLength * Math.tan( this.light.angle * 0.5 );
 
 		this.frustum.scale.set(coneWidth, coneWidth, coneLength);
-		
+
 
 
 		//{

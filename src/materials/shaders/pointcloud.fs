@@ -1,10 +1,19 @@
+precision highp float;
+precision highp int;
 
 #if defined paraboloid_point_shape
 	#extension GL_EXT_frag_depth : enable
 #endif
 
-precision highp float;
-precision highp int;
+#if defined( USE_LOGDEPTHBUF ) && defined( USE_LOGDEPTHBUF_EXT )
+	#extension GL_EXT_frag_depth : enable
+
+	uniform float logDepthBufFC;
+	varying float vFragDepth;
+	varying float vIsPerspective;
+
+#endif
+
 
 uniform mat4 viewMatrix;
 uniform mat4 uViewInv;
@@ -40,18 +49,18 @@ void main() {
 	vec3 color = vColor;
 	float depth = gl_FragCoord.z;
 
-	#if defined(circle_point_shape) || defined(paraboloid_point_shape) 
+	#if defined(circle_point_shape) || defined(paraboloid_point_shape)
 		float u = 2.0 * gl_PointCoord.x - 1.0;
 		float v = 2.0 * gl_PointCoord.y - 1.0;
 	#endif
-	
-	#if defined(circle_point_shape) 
+
+	#if defined(circle_point_shape)
 		float cc = u*u + v*v;
 		if(cc > 1.0){
 			discard;
 		}
 	#endif
-		
+
 	#if defined color_type_indices
 		gl_FragColor = vec4(color, uPCIndex / 255.0);
 	#else
@@ -68,20 +77,28 @@ void main() {
 		float expDepth = pos.z;
 		depth = (pos.z + 1.0) / 2.0;
 		gl_FragDepthEXT = depth;
-		
+
 		#if defined(color_type_depth)
 			color.r = linearDepth;
 			color.g = expDepth;
 		#endif
-		
+
 		#if defined(use_edl)
 			gl_FragColor.a = log2(linearDepth);
 		#endif
-		
+
 	#else
 		#if defined(use_edl)
 			gl_FragColor.a = vLogDepth;
 		#endif
+	#endif
+
+	#if defined( USE_LOGDEPTHBUF ) && defined( USE_LOGDEPTHBUF_EXT )
+
+	// Doing a strict comparison with == 1.0 can cause noise artifacts
+	// on some platforms. See issue #17623.
+	gl_FragDepthEXT = vIsPerspective == 0.0 ? gl_FragCoord.z : log2( vFragDepth ) * logDepthBufFC * 0.5;
+
 	#endif
 
 	#if defined(weighted_splats)
@@ -94,7 +111,7 @@ void main() {
 	#endif
 
 	//gl_FragColor = vec4(0.0, 0.7, 0.0, 1.0);
-	
+
 }
 
 
