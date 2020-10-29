@@ -24,7 +24,7 @@ precision highp int;
 #define PI 3.141592653589793
 
 bool isPerspectiveMatrix( mat4 m ) {
-	return m[ 2 ][ 3 ] == - 1.0;
+	return m[ 3 ][ 2 ] == - 1.0;
 }
 attribute vec3 position;
 attribute vec3 color;

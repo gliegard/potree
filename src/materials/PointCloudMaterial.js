@@ -271,8 +271,8 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			defines.push(value);
 		}
 
-		// defines.push('#define USE_LOGDEPTHBUF');
-		// defines.push('#define USE_LOGDEPTHBUF_EXT');
+		defines.push('#define USE_LOGDEPTHBUF');
+		defines.push('#define USE_LOGDEPTHBUF_EXT');
 
 		return defines.join("\n");
 	}
