@@ -247,7 +247,9 @@ export class Viewer extends EventDispatcher{
 			this.setPointBudget(1*1000*1000);
 			this.setShowBoundingBox(false);
 			this.setFreeze(false);
-			this.setControls(this.orbitControls);
+			if (args.withControls !== false) {
+				this.setControls(this.orbitControls);
+			}
 			this.setBackground('gradient');
 
 			this.scaleFactor = 1;

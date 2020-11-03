@@ -31,7 +31,7 @@ export class PotreeRenderer {
 			renderer.clear(true, true, false);
 		}
 	}
- 
+
 	render(params){
 		let {viewer, renderer} = this;
 
@@ -54,50 +54,54 @@ export class PotreeRenderer {
 		}else if(viewer.background === "gradient"){
 			renderer.render(viewer.scene.sceneBG, viewer.scene.cameraBG);
 		}
-		
+
 		for(let pointcloud of this.viewer.scene.pointclouds){
 			const {material} = pointcloud;
 			material.useEDL = false;
 			//material.updateShaderSource();
 		}
-		
+
 		viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, null, {
 			clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
 		});
-		
+
 		// render scene
 		renderer.render(viewer.scene.scene, camera);
 
 		viewer.dispatchEvent({type: "render.pass.scene",viewer: viewer});
-		
+
 		viewer.clippingTool.update();
 		renderer.render(viewer.clippingTool.sceneMarker, viewer.scene.cameraScreenSpace); //viewer.scene.cameraScreenSpace);
 		renderer.render(viewer.clippingTool.sceneVolume, camera);
 
-		renderer.render(viewer.controls.sceneControls, camera);
-		
+		if(viewer.controls) {
+			renderer.render(viewer.controls.sceneControls, camera);
+		}
+
 		renderer.clearDepth();
-		
+
 		viewer.transformationTool.update();
-		
+
 		viewer.dispatchEvent({type: "render.pass.perspective_overlay",viewer: viewer});
 
-		renderer.render(viewer.controls.sceneControls, camera);
+		if(viewer.controls) {
+			renderer.render(viewer.controls.sceneControls, camera);
+		}
 		renderer.render(viewer.clippingTool.sceneVolume, camera);
 		renderer.render(viewer.transformationTool.scene, camera);
-		
-		renderer.setViewport(width - viewer.navigationCube.width, 
-									height - viewer.navigationCube.width, 
+
+		renderer.setViewport(width - viewer.navigationCube.width,
+									height - viewer.navigationCube.width,
 									viewer.navigationCube.width, viewer.navigationCube.width);
-		renderer.render(viewer.navigationCube, viewer.navigationCube.camera);		
+		renderer.render(viewer.navigationCube, viewer.navigationCube.camera);
 		renderer.setViewport(0, 0, width, height);
-		
+
 		// renderer.render(viewer.transformationTool.scene, camera);
 
-		// renderer.setViewport(renderer.domElement.clientWidth - viewer.navigationCube.width, 
-		// 							renderer.domElement.clientHeight - viewer.navigationCube.width, 
+		// renderer.setViewport(renderer.domElement.clientWidth - viewer.navigationCube.width,
+		// 							renderer.domElement.clientHeight - viewer.navigationCube.width,
 		// 							viewer.navigationCube.width, viewer.navigationCube.width);
-		// renderer.render(viewer.navigationCube, viewer.navigationCube.camera);		
+		// renderer.render(viewer.navigationCube, viewer.navigationCube.camera);
 		// renderer.setViewport(0, 0, renderer.domElement.clientWidth, renderer.domElement.clientHeight);
 
 		viewer.dispatchEvent({type: "render.pass.end",viewer: viewer});

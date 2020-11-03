@@ -9,7 +9,7 @@ import {Utils} from "../utils.js";
 
 
 export class HQSplatRenderer{
-	
+
 	constructor(viewer){
 		this.viewer = viewer;
 
@@ -171,7 +171,7 @@ export class HQSplatRenderer{
 
 				pointcloud.material = depthMaterial;
 			}
-			
+
 			viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtDepth, {
 				clipSpheres: viewer.scene.volumes.filter(v => (v instanceof SphereVolume)),
 			});
@@ -238,7 +238,7 @@ export class HQSplatRenderer{
 
 				pointcloud.material = attributeMaterial;
 			}
-			
+
 			let gl = this.gl;
 
 			viewer.renderer.setRenderTarget(null);
@@ -292,7 +292,7 @@ export class HQSplatRenderer{
 
 			normalizationMaterial.uniforms.uWeightMap.value = this.rtAttribute.texture;
 			normalizationMaterial.uniforms.uDepthMap.value = this.rtAttribute.depthTexture;
-			
+
 			Utils.screenPass.render(viewer.renderer, normalizationMaterial);
 		}
 
@@ -306,16 +306,18 @@ export class HQSplatRenderer{
 
 		viewer.dispatchEvent({type: "render.pass.perspective_overlay",viewer: viewer});
 
-		viewer.renderer.render(viewer.controls.sceneControls, camera);
+		if (viewer.controls) {
+			viewer.renderer.render(viewer.controls.sceneControls, camera);
+		}
 		viewer.renderer.render(viewer.clippingTool.sceneVolume, camera);
 		viewer.renderer.render(viewer.transformationTool.scene, camera);
 
-		viewer.renderer.setViewport(width - viewer.navigationCube.width, 
-									height - viewer.navigationCube.width, 
+		viewer.renderer.setViewport(width - viewer.navigationCube.width,
+									height - viewer.navigationCube.width,
 									viewer.navigationCube.width, viewer.navigationCube.width);
-		viewer.renderer.render(viewer.navigationCube, viewer.navigationCube.camera);		
+		viewer.renderer.render(viewer.navigationCube, viewer.navigationCube.camera);
 		viewer.renderer.setViewport(0, 0, width, height);
-		
+
 		viewer.dispatchEvent({type: "render.pass.end",viewer: viewer});
 
 	}
