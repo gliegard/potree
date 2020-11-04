@@ -709,42 +709,10 @@ export class Renderer {
 
 		let i = 0;
 		for (let node of nodes) {
-
-			if(exports.debug.allowedNodes !== undefined){
-				if(!exports.debug.allowedNodes.includes(node.name)){
-					continue;
-				}
-			}
-
+			// this.threeRenderer.render(node.sceneNode, camera);
+			// continue;
 			let world = node.sceneNode.matrixWorld;
 			worldView.multiplyMatrices(view, world);
-
-			if (visibilityTextureData) {
-				let vnStart = visibilityTextureData.offsets.get(node);
-				shader.setUniform1f("uVNStart", vnStart);
-			}
-
-
-			let level = node.getLevel();
-
-			if(node.debug){
-				shader.setUniform("uDebug", true);
-			}else{
-				shader.setUniform("uDebug", false);
-			}
-
-			// let isLeaf = false;
-			// if(node instanceof PointCloudOctreeNode){
-			// 	isLeaf = Object.keys(node.children).length === 0;
-			// }else if(node instanceof PointCloudArena4DNode){
-			// 	isLeaf = node.geometryNode.isLeaf;
-			// }
-			// shader.setUniform("uIsLeafNode", isLeaf);
-
-			// let isLeaf = node.children.filter(n => n != null).length === 0;
-			// if(!isLeaf){
-			// 	continue;
-			// }
 
 
 			// TODO consider passing matrices in an array to avoid uniformMatrix4fv overhead
@@ -754,6 +722,9 @@ export class Renderer {
 				gl.uniformMatrix4fv(lModel, false, mat4holder);
 			}
 
+			const toto = shader.uniformLocations["logDepthBufFC"];
+			gl.uniform1f(toto, false, 2.0 / ( Math.log( camera.far + 1.0 ) / Math.LN2 ));
+
 			const lModelView = shader.uniformLocations["modelViewMatrix"];
 			//mat4holder.set(worldView.elements);
 			// faster then set in chrome 63
@@ -762,161 +733,7 @@ export class Renderer {
 			}
 			gl.uniformMatrix4fv(lModelView, false, mat4holder);
 
-			{ // Clip Polygons
-				if(material.clipPolygons && material.clipPolygons.length > 0){
-
-					let clipPolygonVCount = [];
-					let worldViewProjMatrices = [];
-
-					for(let clipPolygon of material.clipPolygons){
-
-						let view = clipPolygon.viewMatrix;
-						let proj = clipPolygon.projMatrix;
-
-						let worldViewProj = proj.clone().multiply(view).multiply(world);
-
-						clipPolygonVCount.push(clipPolygon.markers.length);
-						worldViewProjMatrices.push(worldViewProj);
-					}
-
-					let flattenedMatrices = [].concat(...worldViewProjMatrices.map(m => m.elements));
-
-					let flattenedVertices = new Array(8 * 3 * material.clipPolygons.length);
-					for(let i = 0; i < material.clipPolygons.length; i++){
-						let clipPolygon = material.clipPolygons[i];
-						for(let j = 0; j < clipPolygon.markers.length; j++){
-							flattenedVertices[i * 24 + (j * 3 + 0)] = clipPolygon.markers[j].position.x;
-							flattenedVertices[i * 24 + (j * 3 + 1)] = clipPolygon.markers[j].position.y;
-							flattenedVertices[i * 24 + (j * 3 + 2)] = clipPolygon.markers[j].position.z;
-						}
-					}
-
-					const lClipPolygonVCount = shader.uniformLocations["uClipPolygonVCount[0]"];
-					gl.uniform1iv(lClipPolygonVCount, clipPolygonVCount);
-
-					const lClipPolygonVP = shader.uniformLocations["uClipPolygonWVP[0]"];
-					gl.uniformMatrix4fv(lClipPolygonVP, false, flattenedMatrices);
-
-					const lClipPolygons = shader.uniformLocations["uClipPolygonVertices[0]"];
-					gl.uniform3fv(lClipPolygons, flattenedVertices);
-
-				}
-			}
-
-
-			//shader.setUniformMatrix4("modelMatrix", world);
-			//shader.setUniformMatrix4("modelViewMatrix", worldView);
-			shader.setUniform1f("uLevel", level);
-			shader.setUniform1f("uNodeSpacing", node.geometryNode.estimatedSpacing);
-
-			shader.setUniform1f("uPCIndex", i);
-			// uBBSize
-
-			if (shadowMaps.length > 0) {
-
-				const lShadowMap = shader.uniformLocations["uShadowMap[0]"];
-
-				shader.setUniform3f("uShadowColor", material.uniforms.uShadowColor.value);
-
-				let bindingStart = 5;
-				let bindingPoints = new Array(shadowMaps.length).fill(bindingStart).map((a, i) => (a + i));
-				gl.uniform1iv(lShadowMap, bindingPoints);
-
-				for (let i = 0; i < shadowMaps.length; i++) {
-					let shadowMap = shadowMaps[i];
-					let bindingPoint = bindingPoints[i];
-					let glTexture = this.threeRenderer.properties.get(shadowMap.target.texture).__webglTexture;
-
-					gl.activeTexture(gl[`TEXTURE${bindingPoint}`]);
-					gl.bindTexture(gl.TEXTURE_2D, glTexture);
-				}
-
-				{
-
-					let worldViewMatrices = shadowMaps
-						.map(sm => sm.camera.matrixWorldInverse)
-						.map(view => new THREE.Matrix4().multiplyMatrices(view, world))
-
-					let flattenedMatrices = [].concat(...worldViewMatrices.map(c => c.elements));
-					const lWorldView = shader.uniformLocations["uShadowWorldView[0]"];
-					gl.uniformMatrix4fv(lWorldView, false, flattenedMatrices);
-				}
-
-				{
-					let flattenedMatrices = [].concat(...shadowMaps.map(sm => sm.camera.projectionMatrix.elements));
-					const lProj = shader.uniformLocations["uShadowProj[0]"];
-					gl.uniformMatrix4fv(lProj, false, flattenedMatrices);
-				}
-			}
-
 			const geometry = node.geometryNode.geometry;
-
-			if(geometry.attributes["gps-time"]){
-				const bufferAttribute = geometry.attributes["gps-time"];
-				const attGPS = octree.getAttribute("gps-time");
-
-				let initialRange = attGPS.initialRange;
-				let initialRangeSize = initialRange[1] - initialRange[0];
-
-				let globalRange = attGPS.range;
-				let globalRangeSize = globalRange[1] - globalRange[0];
-
-				let scale = initialRangeSize / globalRangeSize;
-				let offset = -(globalRange[0] - initialRange[0]) / initialRangeSize;
-
-				shader.setUniform1f("uGpsScale", scale);
-				shader.setUniform1f("uGpsOffset", offset);
-				//shader.setUniform2f("uFilterGPSTimeClipRange", [-Infinity, Infinity]);
-
-				let uFilterGPSTimeClipRange = material.uniforms.uFilterGPSTimeClipRange.value;
-				// let gpsCliPRangeMin = uFilterGPSTimeClipRange[0]
-				// let gpsCliPRangeMax = uFilterGPSTimeClipRange[1]
-				// shader.setUniform2f("uFilterGPSTimeClipRange", [gpsCliPRangeMin, gpsCliPRangeMax]);
-
-				let normalizedClipRange = [
-					(uFilterGPSTimeClipRange[0] - globalRange[0]) / globalRangeSize,
-					(uFilterGPSTimeClipRange[1] - globalRange[0]) / globalRangeSize,
-				];
-
-				shader.setUniform2f("uFilterGPSTimeClipRange", normalizedClipRange);
-
-
-
-				// // ranges in full gps coordinate system
-				// const globalRange = attGPS.range;
-				// const bufferRange = bufferAttribute.potree.range;
-
-				// // ranges in [0, 1]
-				// // normalizedGlobalRange = [0, 1]
-				// // normalizedBufferRange: norm buffer within norm global range e.g. [0.2, 0.8]
-				// const globalWidth = globalRange[1] - globalRange[0];
-				// const normalizedBufferRange = [
-				// 	(bufferRange[0] - globalRange[0]) / globalWidth,
-				// 	(bufferRange[1] - globalRange[0]) / globalWidth,
-				// ];
-
-				// shader.setUniform2f("uNormalizedGpsBufferRange", normalizedBufferRange);
-
-				// let uFilterGPSTimeClipRange = material.uniforms.uFilterGPSTimeClipRange.value;
-				// let gpsCliPRangeMin = uFilterGPSTimeClipRange[0]
-				// let gpsCliPRangeMax = uFilterGPSTimeClipRange[1]
-				// shader.setUniform2f("uFilterGPSTimeClipRange", [gpsCliPRangeMin, gpsCliPRangeMax]);
-
-				// shader.setUniform1f("uGpsScale", bufferAttribute.potree.scale);
-				// shader.setUniform1f("uGpsOffset", bufferAttribute.potree.offset);
-			}
-
-			{
-				let uFilterReturnNumberRange = material.uniforms.uFilterReturnNumberRange.value;
-				let uFilterNumberOfReturnsRange = material.uniforms.uFilterNumberOfReturnsRange.value;
-				let uFilterPointSourceIDClipRange = material.uniforms.uFilterPointSourceIDClipRange.value;
-
-
-
-				shader.setUniform2f("uFilterReturnNumberRange", uFilterReturnNumberRange);
-				shader.setUniform2f("uFilterNumberOfReturnsRange", uFilterNumberOfReturnsRange);
-				shader.setUniform2f("uFilterPointSourceIDClipRange", uFilterPointSourceIDClipRange);
-			}
 
 			let webglBuffer = null;
 			if(!this.buffers.has(geometry)){
@@ -935,82 +752,21 @@ export class Renderer {
 
 			gl.bindVertexArray(webglBuffer.vao);
 
-			let isExtraAttribute =
-				attributeLocations[material.activeAttributeName] === undefined
-				&& Object.keys(geometry.attributes).includes(material.activeAttributeName);
+			for(const attributeName in geometry.attributes){
+				const bufferAttribute = geometry.attributes[attributeName];
+				const vbo = webglBuffer.vbos.get(attributeName);
 
-			if(isExtraAttribute){
 
-				const attributeLocation = attributeLocations["aExtra"].location;
+				if(attributeLocations[attributeName] !== undefined){
+					const attributeLocation = attributeLocations[attributeName].location;
 
-				for(const attributeName in geometry.attributes){
-					const bufferAttribute = geometry.attributes[attributeName];
-					const vbo = webglBuffer.vbos.get(attributeName);
-
-					gl.bindBuffer(gl.ARRAY_BUFFER, vbo.handle);
-					gl.disableVertexAttribArray(attributeLocation);
-				}
-
-				const attName = material.activeAttributeName;
-				const bufferAttribute = geometry.attributes[attName];
-				const vbo = webglBuffer.vbos.get(attName);
-
-				if(bufferAttribute !== undefined && vbo !== undefined){
 					let type = this.glTypeMapping.get(bufferAttribute.array.constructor);
 					let normalized = bufferAttribute.normalized;
 
 					gl.bindBuffer(gl.ARRAY_BUFFER, vbo.handle);
 					gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
 					gl.enableVertexAttribArray(attributeLocation);
-				}
 
-
-
-
-				{
-					const attExtra = octree.pcoGeometry.pointAttributes.attributes
-						.find(a => a.name === attName);
-
-					let range = material.getRange(attName);
-					if(!range){
-						range = attExtra.range;
-					}
-
-					if(!range){
-						range = [0, 1];
-					}
-
-					let initialRange = attExtra.initialRange;
-					let initialRangeSize = initialRange[1] - initialRange[0];
-
-					let globalRange = range;
-					let globalRangeSize = globalRange[1] - globalRange[0];
-
-					let scale = initialRangeSize / globalRangeSize;
-					let offset = -(globalRange[0] - initialRange[0]) / initialRangeSize;
-
-					shader.setUniform1f("uExtraScale", scale);
-					shader.setUniform1f("uExtraOffset", offset);
-				}
-
-			}else{
-
-				for(const attributeName in geometry.attributes){
-					const bufferAttribute = geometry.attributes[attributeName];
-					const vbo = webglBuffer.vbos.get(attributeName);
-
-
-					if(attributeLocations[attributeName] !== undefined){
-						const attributeLocation = attributeLocations[attributeName].location;
-
-						let type = this.glTypeMapping.get(bufferAttribute.array.constructor);
-						let normalized = bufferAttribute.normalized;
-
-						gl.bindBuffer(gl.ARRAY_BUFFER, vbo.handle);
-						gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
-						gl.enableVertexAttribArray(attributeLocation);
-
-					}
 				}
 			}
 
@@ -1044,21 +800,6 @@ export class Renderer {
 		let visibilityTextureData = null;
 
 		let currentTextureBindingPoint = 0;
-
-		if (material.pointSizeType >= 0) {
-			if (material.pointSizeType === PointSizeType.ADAPTIVE ||
-				material.activeAttributeName === "level of detail") {
-
-				let vnNodes = (params.vnTextureNodes != null) ? params.vnTextureNodes : nodes;
-				visibilityTextureData = octree.computeVisibilityTextureData(vnNodes, camera);
-
-				const vnt = material.visibleNodesTexture;
-				const data = vnt.image.data;
-				data.set(visibilityTextureData.data);
-				vnt.needsUpdate = true;
-
-			}
-		}
 
 		{ // UPDATE SHADER AND TEXTURES
 			if (!this.shaders.has(material)) {
@@ -1131,305 +872,43 @@ export class Renderer {
 
 				material.needsUpdate = false;
 			}
-
-			for (let uniformName of Object.keys(material.uniforms)) {
-				let uniform = material.uniforms[uniformName];
-
-				if (uniform.type == "t") {
-
-					let texture = uniform.value;
-
-					if (!texture) {
-						continue;
-					}
-
-					if (!this.textures.has(texture)) {
-						let webglTexture = new WebGLTexture(gl, texture);
-
-						this.textures.set(texture, webglTexture);
-					}
-
-					let webGLTexture = this.textures.get(texture);
-					webGLTexture.update();
-
-
-				}
-			}
 		}
 
 		gl.useProgram(shader.program);
 
-		let transparent = false;
-		if(params.transparent !== undefined){
-			transparent = params.transparent && material.opacity < 1;
-		}else{
-			transparent = material.opacity < 1;
-		}
-
-		if (transparent){
-			gl.enable(gl.BLEND);
-			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-			gl.depthMask(false);
-			gl.disable(gl.DEPTH_TEST);
-		} else {
-			gl.disable(gl.BLEND);
-			gl.depthMask(true);
-			gl.enable(gl.DEPTH_TEST);
-		}
-
-		if(params.blendFunc !== undefined){
-			gl.enable(gl.BLEND);
-			gl.blendFunc(...params.blendFunc);
-		}
-
-		if(params.depthTest !== undefined){
-			if(params.depthTest === true){
-				gl.enable(gl.DEPTH_TEST);
-			}else{
-				gl.disable(gl.DEPTH_TEST);
-			}
-		}
-
-		if(params.depthWrite !== undefined){
-			 if(params.depthWrite === true){
-				 gl.depthMask(true);
-			 }else{
-				 gl.depthMask(false);
-			 }
-
-		}
 
 
-		{ // UPDATE UNIFORMS
-			shader.setUniformMatrix4("projectionMatrix", proj);
-			shader.setUniformMatrix4("viewMatrix", view);
-			shader.setUniformMatrix4("uViewInv", viewInv);
-			shader.setUniformMatrix4("uProjInv", projInv);
+		// gl.disable(gl.BLEND);
+		// gl.enable(gl.DEPTH_TEST);
+		// gl.depthMask(true);
 
-			let screenWidth = target ? target.width : material.screenWidth;
-			let screenHeight = target ? target.height : material.screenHeight;
-
-			shader.setUniform1f("uScreenWidth", screenWidth);
-			shader.setUniform1f("uScreenHeight", screenHeight);
-			shader.setUniform1f("fov", Math.PI * camera.fov / 180);
-			shader.setUniform1f("near", camera.near);
-			shader.setUniform1f("far", camera.far);
-
-			if(camera instanceof THREE.OrthographicCamera){
-				shader.setUniform("uUseOrthographicCamera", true);
-				shader.setUniform("uOrthoWidth", camera.right - camera.left);
-				shader.setUniform("uOrthoHeight", camera.top - camera.bottom);
-			}else{
-				shader.setUniform("uUseOrthographicCamera", false);
-			}
-
-			if(material.clipBoxes.length + material.clipPolygons.length === 0){
-				shader.setUniform1i("clipTask", ClipTask.NONE);
-			}else{
-				shader.setUniform1i("clipTask", material.clipTask);
-			}
-
-			shader.setUniform1i("clipMethod", material.clipMethod);
-
-			if (material.clipBoxes && material.clipBoxes.length > 0) {
-				//let flattenedMatrices = [].concat(...material.clipBoxes.map(c => c.inverse.elements));
-
-				//const lClipBoxes = shader.uniformLocations["clipBoxes[0]"];
-				//gl.uniformMatrix4fv(lClipBoxes, false, flattenedMatrices);
-
-				const lClipBoxes = shader.uniformLocations["clipBoxes[0]"];
-				gl.uniformMatrix4fv(lClipBoxes, false, material.uniforms.clipBoxes.value);
-			}
-
-			// TODO CLIPSPHERES
-			if(params.clipSpheres && params.clipSpheres.length > 0){
-
-				let clipSpheres = params.clipSpheres;
-
-				let matrices = [];
-				for(let clipSphere of clipSpheres){
-					//let mScale = new THREE.Matrix4().makeScale(...clipSphere.scale.toArray());
-					//let mTranslate = new THREE.Matrix4().makeTranslation(...clipSphere.position.toArray());
-
-					//let clipToWorld = new THREE.Matrix4().multiplyMatrices(mTranslate, mScale);
-					let clipToWorld = clipSphere.matrixWorld;
-					let viewToWorld = camera.matrixWorld
-					let worldToClip = new THREE.Matrix4().getInverse(clipToWorld);
-
-					let viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
-
-					matrices.push(viewToClip);
-				}
-
-				let flattenedMatrices = [].concat(...matrices.map(matrix => matrix.elements));
-
-				const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
-				gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
-
-				//const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
-				//gl.uniformMatrix4fv(lClipSpheres, false, material.uniforms.clipSpheres.value);
-			}
+		gl.frontFace( 2305 );
+		gl.disable(3042);
+		gl.depthFunc( 515 );
+		gl.enable( 2929 );
+		gl.colorMask( true, true, true, true );
+		gl.disable(2960);
+		gl.disable(32823);
 
 
-			shader.setUniform1f("size", material.size);
-			shader.setUniform1f("maxSize", material.uniforms.maxSize.value);
-			shader.setUniform1f("minSize", material.uniforms.minSize.value);
 
 
-			// uniform float uPCIndex
-			shader.setUniform1f("uOctreeSpacing", material.spacing);
-			shader.setUniform("uOctreeSize", material.uniforms.octreeSize.value);
+		//
 
-
-			//uniform vec3 uColor;
-			shader.setUniform3f("uColor", material.color.toArray());
-			//uniform float opacity;
-			shader.setUniform1f("uOpacity", material.opacity);
-
-			shader.setUniform2f("elevationRange", material.elevationRange);
-			shader.setUniform2f("intensityRange", material.intensityRange);
-
-
-			shader.setUniform3f("uIntensity_gbc", [
-				material.intensityGamma,
-				material.intensityBrightness,
-				material.intensityContrast
-			]);
-
-			shader.setUniform3f("uRGB_gbc", [
-				material.rgbGamma,
-				material.rgbBrightness,
-				material.rgbContrast
-			]);
-
-			shader.setUniform1f("uTransition", material.transition);
-			shader.setUniform1f("wRGB", material.weightRGB);
-			shader.setUniform1f("wIntensity", material.weightIntensity);
-			shader.setUniform1f("wElevation", material.weightElevation);
-			shader.setUniform1f("wClassification", material.weightClassification);
-			shader.setUniform1f("wReturnNumber", material.weightReturnNumber);
-			shader.setUniform1f("wSourceID", material.weightSourceID);
-
-			shader.setUniform("backfaceCulling", material.uniforms.backfaceCulling.value);
-
-			let vnWebGLTexture = this.textures.get(material.visibleNodesTexture);
-			if(vnWebGLTexture){
-				shader.setUniform1i("visibleNodesTexture", currentTextureBindingPoint);
-				gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
-				gl.bindTexture(vnWebGLTexture.target, vnWebGLTexture.id);
-				currentTextureBindingPoint++;
-			}
-
-			let gradientTexture = this.textures.get(material.gradientTexture);
-			shader.setUniform1i("gradient", currentTextureBindingPoint);
-			gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
-			gl.bindTexture(gradientTexture.target, gradientTexture.id);
-
-			const repeat = material.elevationGradientRepeat;
-			if(repeat === ElevationGradientRepeat.REPEAT){
-				gl.texParameteri(gradientTexture.target, gl.TEXTURE_WRAP_S, gl.REPEAT);
-				gl.texParameteri(gradientTexture.target, gl.TEXTURE_WRAP_T, gl.REPEAT);
-			}else if(repeat === ElevationGradientRepeat.MIRRORED_REPEAT){
-				gl.texParameteri(gradientTexture.target, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
-				gl.texParameteri(gradientTexture.target, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
-			}else{
-				gl.texParameteri(gradientTexture.target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-				gl.texParameteri(gradientTexture.target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-			}
-			currentTextureBindingPoint++;
-
-			let classificationTexture = this.textures.get(material.classificationTexture);
-			shader.setUniform1i("classificationLUT", currentTextureBindingPoint);
-			gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
-			gl.bindTexture(classificationTexture.target, classificationTexture.id);
-			currentTextureBindingPoint++;
-
-			let matcapTexture = this.textures.get(material.matcapTexture);
-			shader.setUniform1i("matcapTextureUniform", currentTextureBindingPoint);
-			gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
-			gl.bindTexture(matcapTexture.target, matcapTexture.id);
-			currentTextureBindingPoint++;
-
-
-			if (material.snapEnabled === true) {
-
-				{
-					const lSnapshot = shader.uniformLocations["uSnapshot[0]"];
-					const lSnapshotDepth = shader.uniformLocations["uSnapshotDepth[0]"];
-
-					let bindingStart = currentTextureBindingPoint;
-					let lSnapshotBindingPoints = new Array(5).fill(bindingStart).map((a, i) => (a + i));
-					let lSnapshotDepthBindingPoints = new Array(5)
-						.fill(1 + Math.max(...lSnapshotBindingPoints))
-						.map((a, i) => (a + i));
-					currentTextureBindingPoint = 1 + Math.max(...lSnapshotDepthBindingPoints);
-
-					gl.uniform1iv(lSnapshot, lSnapshotBindingPoints);
-					gl.uniform1iv(lSnapshotDepth, lSnapshotDepthBindingPoints);
-
-					for (let i = 0; i < 5; i++) {
-						let texture = material.uniforms[`uSnapshot`].value[i];
-						let textureDepth = material.uniforms[`uSnapshotDepth`].value[i];
-
-						if (!texture) {
-							break;
-						}
-
-						let snapTexture = this.threeRenderer.properties.get(texture).__webglTexture;
-						let snapTextureDepth = this.threeRenderer.properties.get(textureDepth).__webglTexture;
-
-						let bindingPoint = lSnapshotBindingPoints[i];
-						let depthBindingPoint = lSnapshotDepthBindingPoints[i];
-
-						gl.activeTexture(gl[`TEXTURE${bindingPoint}`]);
-						gl.bindTexture(gl.TEXTURE_2D, snapTexture);
-
-						gl.activeTexture(gl[`TEXTURE${depthBindingPoint}`]);
-						gl.bindTexture(gl.TEXTURE_2D, snapTextureDepth);
-					}
-				}
-
-				{
-					let flattenedMatrices = [].concat(...material.uniforms.uSnapView.value.map(c => c.elements));
-					const lSnapView = shader.uniformLocations["uSnapView[0]"];
-					gl.uniformMatrix4fv(lSnapView, false, flattenedMatrices);
-				}
-				{
-					let flattenedMatrices = [].concat(...material.uniforms.uSnapProj.value.map(c => c.elements));
-					const lSnapProj = shader.uniformLocations["uSnapProj[0]"];
-					gl.uniformMatrix4fv(lSnapProj, false, flattenedMatrices);
-				}
-				{
-					let flattenedMatrices = [].concat(...material.uniforms.uSnapProjInv.value.map(c => c.elements));
-					const lSnapProjInv = shader.uniformLocations["uSnapProjInv[0]"];
-					gl.uniformMatrix4fv(lSnapProjInv, false, flattenedMatrices);
-				}
-				{
-					let flattenedMatrices = [].concat(...material.uniforms.uSnapViewInv.value.map(c => c.elements));
-					const lSnapViewInv = shader.uniformLocations["uSnapViewInv[0]"];
-					gl.uniformMatrix4fv(lSnapViewInv, false, flattenedMatrices);
-				}
-
-			}
-		}
+		shader.setUniformMatrix4("projectionMatrix", proj);
 
 		this.renderNodes(octree, nodes, visibilityTextureData, camera, target, shader, params);
 
-		gl.activeTexture(gl.TEXTURE2);
-		gl.bindTexture(gl.TEXTURE_2D, null);
-		gl.activeTexture(gl.TEXTURE0);
+		// gl.activeTexture(gl.TEXTURE2);
+		// gl.bindTexture(gl.TEXTURE_2D, null);
+		// gl.activeTexture(gl.TEXTURE0);
 	}
 
 	render(scene, camera, target = null, params = {}) {
 
 		const gl = this.gl;
 
-		// PREPARE
-		if (target != null) {
-			this.threeRenderer.setRenderTarget(target);
-		}
-
-		camera.updateProjectionMatrix();
+		// camera.updateProjectionMatrix();
 
 		const traversalResult = this.traverse(scene);
 
@@ -1447,9 +926,6 @@ export class Renderer {
 
 		this.threeRenderer.state.reset();
 	}
-
-
-
 };
 
 

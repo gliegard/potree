@@ -1693,8 +1693,8 @@ export class Viewer extends EventDispatcher{
 					near = 0.1;
 				}
 
-				camera.near = near;
-				camera.far = far;
+				// camera.near = near;
+				// camera.far = far;
 			}else{
 				// don't change near and far in this case
 			}
@@ -1704,7 +1704,7 @@ export class Viewer extends EventDispatcher{
 			}
 		}
 
-		this.scene.cameraP.fov = this.fov;
+		// this.scene.cameraP.fov = this.fov;
 
 		if (this.getControls() === this.deviceControls) {
 			this.controls.setScene(scene);
@@ -1835,187 +1835,15 @@ export class Viewer extends EventDispatcher{
 		try{
 
 			let pRenderer = null;
-
-			if(this.useHQ){
-				if (!this.hqRenderer) {
-					this.hqRenderer = new HQSplatRenderer(this);
-				}
-				this.hqRenderer.useEDL = this.useEDL;
-				//this.hqRenderer.render(this.renderer);
-
-				pRenderer = this.hqRenderer;
-			}else{
-				if (this.useEDL && Features.SHADER_EDL.isSupported()) {
-					if (!this.edlRenderer) {
-						this.edlRenderer = new EDLRenderer(this);
-					}
-					//this.edlRenderer.render(this.renderer);
-					pRenderer = this.edlRenderer;
-				} else {
-					if (!this.potreeRenderer) {
-						this.potreeRenderer = new PotreeRenderer(this);
-					}
-					//this.potreeRenderer.render();
-					pRenderer = this.potreeRenderer;
-				}
+			if (!this.potreeRenderer) {
+				this.potreeRenderer = new PotreeRenderer(this);
 			}
+			//this.potreeRenderer.render();
+			pRenderer = this.potreeRenderer;
 
-			const vr = this.vr;
-			const vrActive = (vr && vr.display.isPresenting);
+			pRenderer.clear();
 
-			if(vrActive){
-
-				const {display, frameData} = vr;
-
-				const leftEye = display.getEyeParameters("left");
-				const rightEye = display.getEyeParameters("right");
-
-				let width = Math.max(leftEye.renderWidth, rightEye.renderWidth) * 2;
-				let height = Math.max(leftEye.renderHeight, rightEye.renderHeight);
-
-				// width *= 0.5;
-				// height *= 0.5;
-
-				this.renderer.setSize(width, height);
-
-				pRenderer.clear();
-
-				//const camera = new THREE.Camera();
-				viewer.scene.cameraMode = CameraMode.VR;
-				const camera = viewer.scene.getActiveCamera();
-				{
-					camera.near = display.depthNear;
-					camera.far = display.depthFar;
-					camera.projectionMatrix = new THREE.Matrix4();
-					camera.matrixWorldInverse = new THREE.Matrix4();
-					camera.matrixWorld = new THREE.Matrix4();
-					camera.updateProjectionMatrix =  () => {};
-					camera.updateMatrixWorld = () => {};
-					camera.fov = 60;
-				};
-
-				const flipWorld = new THREE.Matrix4().fromArray([
-					1, 0, 0, 0,
-					0, 0, 1, 0,
-					0, -1, 0, 0,
-					0, 0, 0, 1
-				]);
-				const flipView = new THREE.Matrix4().getInverse(flipWorld);
-
-				vr.node.updateMatrixWorld();
-
-				{// LEFT
-					camera.projectionMatrix.fromArray(frameData.leftProjectionMatrix);
-
-					const leftView = new THREE.Matrix4().fromArray(frameData.leftViewMatrix);
-					const view = new THREE.Matrix4().multiplyMatrices(leftView, flipView);
-					const world = new THREE.Matrix4().getInverse(view);
-
-					{
-						const tmp = new THREE.Matrix4().multiplyMatrices(vr.node.matrixWorld, world);
-						world.copy(tmp);
-						view.getInverse(world);
-					}
-
-					camera.matrixWorldInverse.copy(view);
-					camera.matrixWorld.copy(world);
-
-					const viewport = [0, 0, width / 2, height];
-
-					this.renderer.setViewport(...viewport);
-					pRenderer.render({camera: camera, viewport: viewport});
-					//this.renderer.render(this.overlay, this.overlayCamera);
-				}
-
-				{// RIGHT
-
-					camera.projectionMatrix.fromArray(frameData.rightProjectionMatrix);
-
-					const rightView = new THREE.Matrix4().fromArray(frameData.rightViewMatrix);
-					const view = new THREE.Matrix4().multiplyMatrices(rightView, flipView);
-					const world = new THREE.Matrix4().getInverse(view);
-
-					{
-						const tmp = new THREE.Matrix4().multiplyMatrices(vr.node.matrixWorld, world);
-						world.copy(tmp);
-						view.getInverse(world);
-					}
-
-					camera.matrixWorldInverse.copy(view);
-					camera.matrixWorld.copy(world);
-
-					const viewport = [width / 2, 0, width / 2, height];
-
-					this.renderer.setViewport(...viewport);
-					pRenderer.clearTargets();
-					pRenderer.render({camera: camera, viewport: viewport, debug: 2});
-					//this.renderer.render(this.overlay, this.overlayCamera);
-				}
-
-				{ // CENTER
-
-					{ // central view matrix
-						// TODO this can't be right...can it?
-
-						const left = frameData.leftViewMatrix;
-						const right = frameData.rightViewMatrix
-
-						const centerView = new THREE.Matrix4();
-
-						for(let i = 0; i < centerView.elements.length; i++){
-							centerView.elements[i] = (left[i] + right[i]) / 2;
-						}
-
-						const view = new THREE.Matrix4().multiplyMatrices(centerView, flipView);
-						const world = new THREE.Matrix4().getInverse(view);
-
-						{
-							const tmp = new THREE.Matrix4().multiplyMatrices(vr.node.matrixWorld, world);
-							world.copy(tmp);
-							view.getInverse(world);
-						}
-
-						camera.matrixWorldInverse.copy(view);
-						camera.matrixWorld.copy(world);
-					}
-
-
-					camera.fov = leftEye.fieldOfView.upDegrees;
-				}
-
-			}else{
-
-				{ // resize
-					const width = this.scaleFactor * this.renderArea.clientWidth;
-					const height = this.scaleFactor * this.renderArea.clientHeight;
-
-					this.renderer.setSize(width, height);
-					const pixelRatio = this.renderer.getPixelRatio();
-					const aspect = width / height;
-
-					const scene = this.scene;
-
-					scene.cameraP.aspect = aspect;
-					scene.cameraP.updateProjectionMatrix();
-
-					let frustumScale = this.scene.view.radius;
-					scene.cameraO.left = -frustumScale;
-					scene.cameraO.right = frustumScale;
-					scene.cameraO.top = frustumScale * 1 / aspect;
-					scene.cameraO.bottom = -frustumScale * 1 / aspect;
-					scene.cameraO.updateProjectionMatrix();
-
-					scene.cameraScreenSpace.top = 1/aspect;
-					scene.cameraScreenSpace.bottom = -1/aspect;
-					scene.cameraScreenSpace.updateProjectionMatrix();
-				}
-
-				pRenderer.clear();
-
-				pRenderer.render(this.renderer);
-				this.renderer.render(this.overlay, this.overlayCamera);
-			}
-
+			pRenderer.render(this.renderer);
 		}catch(e){
 			this.onCrash(e);
 		}
