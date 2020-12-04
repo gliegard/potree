@@ -74,15 +74,19 @@ export class PotreeRenderer {
 		renderer.render(viewer.clippingTool.sceneMarker, viewer.scene.cameraScreenSpace); //viewer.scene.cameraScreenSpace);
 		renderer.render(viewer.clippingTool.sceneVolume, camera);
 
-		renderer.render(viewer.controls.sceneControls, camera);
-		
+		if(viewer.controls) {
+			renderer.render(viewer.controls.sceneControls, camera);
+		}
+
 		renderer.clearDepth();
 		
 		viewer.transformationTool.update();
 		
 		viewer.dispatchEvent({type: "render.pass.perspective_overlay",viewer: viewer});
 
-		renderer.render(viewer.controls.sceneControls, camera);
+		if(viewer.controls) {
+			renderer.render(viewer.controls.sceneControls, camera);
+		}
 		renderer.render(viewer.clippingTool.sceneVolume, camera);
 		renderer.render(viewer.transformationTool.scene, camera);
 		
