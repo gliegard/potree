@@ -128,7 +128,7 @@ let resourcePath = scriptPath + '/resources';
 export {scriptPath, resourcePath};
 
 
-export function loadPointCloud(path, name, callback){
+export function loadPointCloud(path, name, callback, material){
 	let loaded = function(e){
 		e.pointcloud.name = name;
 		callback(e);
@@ -145,7 +145,7 @@ export function loadPointCloud(path, name, callback){
 					console.error(new Error(`failed to load point cloud from URL: ${path}`));
 				}
 				else {
-					let pointcloud = new PointCloudOctree(geometry);
+					let pointcloud = new PointCloudOctree(geometry, material);
 					//loaded(pointcloud);
 					resolve({type: 'pointcloud_loaded', pointcloud: pointcloud});
 				}
@@ -156,7 +156,7 @@ export function loadPointCloud(path, name, callback){
 					//callback({type: 'loading_failed'});
 					console.error(new Error(`failed to load point cloud from URL: ${path}`));
 				} else {
-					let pointcloud = new PointCloudOctree(geometry);
+					let pointcloud = new PointCloudOctree(geometry, material);
 					// loaded(pointcloud);
 					resolve({type: 'pointcloud_loaded', pointcloud: pointcloud});
 				}
@@ -168,7 +168,7 @@ export function loadPointCloud(path, name, callback){
 				if(!geometry){
 					console.error(new Error(`failed to load point cloud from URL: ${path}`));
 				}else{
-					let pointcloud = new PointCloudOctree(geometry);
+					let pointcloud = new PointCloudOctree(geometry, material);
 
 					let aPosition = pointcloud.getAttribute("position");
 
@@ -188,7 +188,7 @@ export function loadPointCloud(path, name, callback){
 					//callback({type: 'loading_failed'});
 					console.error(new Error(`failed to load point cloud from URL: ${path}`));
 				} else {
-					let pointcloud = new PointCloudOctree(geometry);
+					let pointcloud = new PointCloudOctree(geometry, material);
 					// loaded(pointcloud);
 					resolve({type: 'pointcloud_loaded', pointcloud: pointcloud});
 				}
