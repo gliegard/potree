@@ -37,7 +37,7 @@ export class SpotLightHelper extends THREE.Object3D{
 			]);
 
 			let geometry = new THREE.BufferGeometry();
-			geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
+			geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
 			let material = new THREE.LineBasicMaterial();
 
@@ -91,7 +91,7 @@ export class SpotLightHelper extends THREE.Object3D{
 		//	this.camera.updateProjectionMatrix();
 		//	this.camera.updateMatrix();
 		//	this.camera.updateMatrixWorld();
-		//	this.camera.matrixWorldInverse.getInverse(this.camera.matrixWorld);
+		//	this.camera.matrixWorldInverse.copy(this.camera.matrixWorld).invert();
 		//}
 
 	}

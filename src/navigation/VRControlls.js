@@ -71,7 +71,7 @@ export class VRControlls{
 		const geometry = new THREE.BufferGeometry();
 
 		geometry.setIndex( new THREE.BufferAttribute( indices, 1 ) );
-		geometry.addAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
+		geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
 
 		geometry.computeBoundingSphere();
 
@@ -413,7 +413,7 @@ export class VRControlls{
 					0, -1, 0, 0,
 					0, 0, 0, 1
 				]);
-			const flipView = new THREE.Matrix4().getInverse(flipWorld);
+			const flipView = new THREE.Matrix4().copy(flipWorld).invert();
 
 			const p1 = new THREE.Vector3(...pad.pose.position).applyMatrix4(flipWorld);
 			const p2 = new THREE.Vector3(...prev.pose.position).applyMatrix4(flipWorld);
@@ -442,7 +442,7 @@ export class VRControlls{
 				0, -1, 0, 0,
 				0, 0, 0, 1
 			]);
-			const flipView = new THREE.Matrix4().getInverse(flipWorld);
+			const flipView = new THREE.Matrix4().copy(flipWorld).invert();
 			const {display, frameData} = vr;
 
 			const computeMove = (pad) => {
@@ -537,7 +537,7 @@ export class VRControlls{
 
 			// 	// const leftView = new THREE.Matrix4().fromArray(frameData.leftViewMatrix);
 			// 	// const view = new THREE.Matrix4().multiplyMatrices(leftView, flipView);
-			// 	// const world = new THREE.Matrix4().getInverse(view);
+			// 	// const world = new THREE.Matrix4().copy(view).invert();
 
 			// 	{ // move to where the controller points
 			// 		const opos = new THREE.Vector3(...right.pose.position);

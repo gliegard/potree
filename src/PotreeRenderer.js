@@ -1037,7 +1037,7 @@ export class Renderer {
 		let view = camera.matrixWorldInverse;
 		let viewInv = camera.matrixWorld;
 		let proj = camera.projectionMatrix;
-		let projInv = new THREE.Matrix4().getInverse(proj);
+		let projInv = new THREE.Matrix4().copy(proj).invert();
 		let worldView = new THREE.Matrix4();
 
 		let shader = null;
@@ -1254,7 +1254,7 @@ export class Renderer {
 					//let clipToWorld = new THREE.Matrix4().multiplyMatrices(mTranslate, mScale);
 					let clipToWorld = clipSphere.matrixWorld;
 					let viewToWorld = camera.matrixWorld
-					let worldToClip = new THREE.Matrix4().getInverse(clipToWorld);
+					let worldToClip = new THREE.Matrix4().copy(clipToWorld).invert();
 
 					let viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
 
