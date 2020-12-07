@@ -1221,6 +1221,9 @@ export class Renderer {
 				shader.setUniform("uOrthoHeight", camera.top - camera.bottom);
 			}else{
 				shader.setUniform("uUseOrthographicCamera", false);
+				// remove webgl warning, uniforms need to be set by default value
+				shader.setUniform("uOrthoWidth", 1);
+				shader.setUniform("uOrthoHeight", 1);
 			}
 
 			if(material.clipBoxes.length + material.clipPolygons.length === 0){
