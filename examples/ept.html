@@ -15,6 +15,7 @@
 </head>
 
 <body>
+	<script src="https://greggman.github.io/webgl-lint/webgl-lint.js" crossorigin></script>
 	<script src="../libs/jquery/jquery-3.1.1.min.js"></script>
 	<script src="../libs/spectrum/spectrum.js"></script>
 	<script src="../libs/jquery-ui/jquery-ui.min.js"></script>
@@ -42,6 +43,7 @@
 		window.viewer = new Potree.Viewer(document.getElementById("potree_render_area"));
 
 		viewer.setEDLEnabled(true);
+		viewer.setBackground("gradient");
 		viewer.setFOV(60);
 		viewer.setPointBudget(2*1000*1000);
 		viewer.loadSettingsFromURL();

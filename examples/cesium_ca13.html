@@ -17,6 +17,7 @@
 </head>
 
 <body>
+	<script src="https://greggman.github.io/webgl-lint/webgl-lint.js" crossorigin></script>
 	<script src="../libs/jquery/jquery-3.1.1.min.js"></script>
 	<script src="../libs/spectrum/spectrum.js"></script>
 	<script src="../libs/jquery-ui/jquery-ui.min.js"></script>
@@ -75,7 +76,7 @@
 	window.potreeViewer = new Potree.Viewer(document.getElementById("potree_render_area"), {
 		useDefaultRenderLoop: false
 	});
-	potreeViewer.setEDLEnabled(true);
+	potreeViewer.setEDLEnabled(false);
 	potreeViewer.setFOV(60);
 	potreeViewer.setPointBudget(1000*1000);
 	potreeViewer.setMinNodeSize(0);
@@ -166,7 +167,7 @@
 					cesiumViewer.camera.frustum.fov = fovx;
 				}
 
-				cesiumViewer.render();
+				// cesiumViewer.render();
 			}else{
 				
 			}
