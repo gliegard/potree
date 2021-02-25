@@ -172,8 +172,7 @@ export function loadPointCloud(path, name, callback, material){
 
 					let aPosition = pointcloud.getAttribute("position");
 
-					let material = pointcloud.material;
-					material.elevationRange = [
+					pointcloud.material.elevationRange = [
 						aPosition.range[0][2],
 						aPosition.range[1][2],
 					];
