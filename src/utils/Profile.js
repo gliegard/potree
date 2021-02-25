@@ -84,7 +84,7 @@ export class Profile extends THREE.Object3D{
 
 		// edges & boxes
 		if (this.points.length > 1) {
-			let lineGeometry = new THREE.Geometry();
+			let lineGeometry = new THREE.BufferGeometry();
 			lineGeometry.vertices.push(new THREE.Vector3(), new THREE.Vector3());
 			lineGeometry.colors.push(this.lineColor, this.lineColor, this.lineColor);
 			let lineMaterial = new THREE.LineBasicMaterial({
