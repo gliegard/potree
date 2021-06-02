@@ -1434,7 +1434,9 @@ export class Viewer extends EventDispatcher{
 			alpha: true, 
 			premultipliedAlpha: false,
 			canvas: canvas,
-			context: context});
+			context: context,
+			logarithmicDepthBuffer: true
+		});
 		this.renderer.sortObjects = false;
 		this.renderer.setSize(width, height);
 		this.renderer.autoClear = false;

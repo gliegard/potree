@@ -12,6 +12,31 @@ import {PointSizeType, PointShape, TreeType, ElevationGradientRepeat} from "../d
 // http://stackoverflow.com/questions/3717226/radius-of-projected-sphere
 //
 
+const ShaderChunk = THREE.ShaderChunk;
+
+// Resolve Includes
+
+const includePattern = /^[ \t]*#include +<([\w\d./]+)>/gm;
+
+function resolveIncludes( string ) {
+
+	return string.replace( includePattern, includeReplacer );
+
+}
+
+function includeReplacer( match, include ) {
+
+	const string = ShaderChunk[ include ];
+
+	if ( string === undefined ) {
+
+		throw new Error( 'Can not resolve #include <' + include + '>' );
+
+	}
+
+	return resolveIncludes( string );
+
+}
 
 export class PointCloudMaterial extends THREE.RawShaderMaterial {
 	constructor (parameters = {}) {
@@ -202,6 +227,9 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			fs = `${definesString}\n${fs}`;
 		}
 
+		vs = resolveIncludes( vs );
+		fs = resolveIncludes( fs );
+
 		this.vertexShader = vs;
 		this.fragmentShader = fs;
 
@@ -231,6 +259,11 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 
 	getDefines () {
 		let defines = [];
+
+		defines.push("#define USE_LOGDEPTHBUF");
+		defines.push("#define USE_LOGDEPTHBUF_EXT");
+		defines.push("#define EPSILON 1e-6");
+		// defines.push("#define gl_FragDepthEXT gl_FragDepth");
 
 		if (this.pointSizeType === PointSizeType.FIXED) {
 			defines.push('#define fixed_point_size');

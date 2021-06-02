@@ -1,10 +1,11 @@
 
-#if defined paraboloid_point_shape
+#if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
 	#extension GL_EXT_frag_depth : enable
 #endif
-
 precision highp float;
 precision highp int;
+
+#include <logdepthbuf_pars_fragment>
 
 uniform mat4 viewMatrix;
 uniform mat4 uViewInv;
@@ -37,6 +38,7 @@ float specularStrength = 1.0;
 
 void main() {
 
+	#include <logdepthbuf_fragment>
 	// gl_FragColor = vec4(vColor, 1.0);
 
 	vec3 color = vColor;

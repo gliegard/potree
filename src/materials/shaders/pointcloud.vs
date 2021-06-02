@@ -1,6 +1,12 @@
+#if defined USE_LOGDEPTHBUF_EXT
+	#extension GL_EXT_frag_depth : enable
+#endif
 
 precision highp float;
 precision highp int;
+
+#include <common>
+#include <logdepthbuf_pars_vertex>
 
 #define max_clip_polygons 8
 #define PI 3.141592653589793
@@ -873,6 +879,8 @@ void main() {
 	//float pointSize = 2.0;
 	gl_PointSize = pointSize;
 	vPointSize = pointSize;
+
+	#include <logdepthbuf_vertex>
 
 	// COLOR
 	vColor = getColor();
