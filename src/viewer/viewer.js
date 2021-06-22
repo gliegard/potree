@@ -1760,9 +1760,9 @@ export class Viewer extends EventDispatcher{
 				if(near === Infinity){
 					near = 0.1;
 				}
-				
-				camera.near = near;
-				camera.far = far;
+				// Remove near and far compute camera
+				// camera.near = near;
+				// camera.far = far;
 			}else{
 				// don't change near and far in this case
 			}
