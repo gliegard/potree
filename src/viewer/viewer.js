@@ -1410,7 +1410,7 @@ export class Viewer extends EventDispatcher{
 			alpha: true,
 			depth: true,
 			stencil: false,
-			antialias: false,
+			antialias: true,
 			//premultipliedAlpha: _premultipliedAlpha,
 			preserveDrawingBuffer: true,
 			powerPreference: "high-performance",
