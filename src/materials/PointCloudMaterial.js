@@ -81,6 +81,7 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 
 		this.uniforms = {
 			level:				{ type: "f", value: 0.0 },
+			logDepthBufFC:   	{ type: "f", value: 0.0 },
 			vnStart:			{ type: "f", value: 0.0 },
 			spacing:			{ type: "f", value: 1.0 },
 			blendHardness:		{ type: "f", value: 2.0 },
@@ -231,6 +232,10 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 
 	getDefines () {
 		let defines = [];
+
+		defines.push("#define USE_LOGDEPTHBUF");
+		defines.push("#define USE_LOGDEPTHBUF_EXT");
+		defines.push("#define EPSILON 1e-6");
 
 		if (this.pointSizeType === PointSizeType.FIXED) {
 			defines.push('#define fixed_point_size');

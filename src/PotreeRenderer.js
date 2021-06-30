@@ -1232,6 +1232,7 @@ export class Renderer {
 			shader.setUniform1f("fov", Math.PI * camera.fov / 180);
 			shader.setUniform1f("near", camera.near);
 			shader.setUniform1f("far", camera.far);
+			shader.setUniform1f("logDepthBufFC", 2.0 / ( Math.log( camera.far + 1.0 ) / Math.LN2));
 			
 			if(camera instanceof THREE.OrthographicCamera){
 				shader.setUniform("uUseOrthographicCamera", true);
