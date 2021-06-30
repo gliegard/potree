@@ -336,7 +336,7 @@ export class EDLRenderer{
 
 		viewer.dispatchEvent({type: "render.pass.perspective_overlay",viewer: viewer});
 
-		viewer.renderer.render(viewer.controls.sceneControls, camera);
+		// viewer.renderer.render(viewer.controls.sceneControls, camera);
 		viewer.renderer.render(viewer.clippingTool.sceneVolume, camera);
 		viewer.renderer.render(viewer.transformationTool.scene, camera);
 		

@@ -304,7 +304,7 @@ export class Viewer extends EventDispatcher{
 			this.setPointBudget(1*1000*1000);
 			this.setShowBoundingBox(false);
 			this.setFreeze(false);
-			this.setControls(this.orbitControls);
+			// this.setControls(this.orbitControls);
 			this.setBackground('gradient');
 
 			this.scaleFactor = 1;
@@ -797,7 +797,7 @@ export class Viewer extends EventDispatcher{
 		camera.rotation.z = view.yaw;
 		camera.updateMatrix();
 		camera.updateMatrixWorld();
-		camera.zoomTo(node, factor);
+		// camera.zoomTo(node, factor);
 
 		let bs;
 		if (node.boundingSphere) {
@@ -893,8 +893,8 @@ export class Viewer extends EventDispatcher{
 		let node = new THREE.Object3D();
 		node.boundingBox = box;
 
-		this.zoomTo(node, factor, animationDuration);
-		this.controls.stop();
+		// this.zoomTo(node, factor, animationDuration);
+		// this.controls.stop();
 	};
 
 	toggleNavigationCube() {
