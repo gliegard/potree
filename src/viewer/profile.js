@@ -124,10 +124,16 @@ class ProfileFakeOctree extends PointCloudTree{
 				};
 			}
 
+			// truePos.set(
+			// 	data.data.position[3 * i + 0] + this.trueOctree.position.x,
+			// 	data.data.position[3 * i + 1] + this.trueOctree.position.y,
+			// 	data.data.position[3 * i + 2] + this.trueOctree.position.z,
+			// );
+
 			truePos.set(
-				data.data.position[3 * i + 0] + this.trueOctree.position.x,
-				data.data.position[3 * i + 1] + this.trueOctree.position.y,
-				data.data.position[3 * i + 2] + this.trueOctree.position.z,
+				data.data.position[3 * i + 0],
+				data.data.position[3 * i + 1],
+				data.data.position[3 * i + 2],
 			);
 
 			let x = data.data.mileage[i];
@@ -339,9 +345,9 @@ export class ProfileWindow extends EventDispatcher {
 					let point = closest.point;
 
 					let position = new Float64Array([
-						point.position[0] + closest.pointcloud.position.x,
-						point.position[1] + closest.pointcloud.position.y,
-						point.position[2] + closest.pointcloud.position.z
+						point.position[0], // + closest.pointcloud.position.x,
+						point.position[1], // + closest.pointcloud.position.y,
+						point.position[2] // + closest.pointcloud.position.z
 					]);
 
 					this.elRoot.find('#profileSelectionProperties').fadeIn(200);
@@ -349,7 +355,9 @@ export class ProfileWindow extends EventDispatcher {
 					this.pickSphere.scale.set(0.5 * radius, 0.5 * radius, 0.5 * radius);
 					this.pickSphere.position.set(point.mileage, 0, position[2]);
 
-					this.viewerPickSphere.position.set(...position);
+					const coord = new itowns.Coordinates('EPSG:2154', ...position).as('EPSG:4978');
+
+					this.viewerPickSphere.position.copy(coord);
 					
 					if(!this.viewer.scene.scene.children.includes(this.viewerPickSphere)){
 						this.viewer.scene.scene.add(this.viewerPickSphere);
@@ -559,7 +567,7 @@ export class ProfileWindow extends EventDispatcher {
 				for (let i = 0; i < points.numPoints; i++) {
 
 					let m = points.data.mileage[i] - mileage;
-					let e = points.data.position[3 * i + 2] - elevation + pointcloud.position.z;
+					let e = points.data.position[3 * i + 2] - elevation; // + pointcloud.position.z;
 					let r = Math.sqrt(m * m + e * e);
 
 					const withinDistance = r < radius && r < closest.distance;
@@ -647,7 +655,7 @@ export class ProfileWindow extends EventDispatcher {
 		}
 
 		this.camera = new THREE.OrthographicCamera(-1000, 1000, 1000, -1000, -1000, 1000);
-		this.camera.up.set(0, 0, 1);
+		// this.camera.up.set(0, 0, 1);
 		this.camera.rotation.order = "ZXY";
 		this.camera.rotation.x = Math.PI / 2.0;
 	

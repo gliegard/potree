@@ -277,17 +277,39 @@ export class Profile extends THREE.Object3D{
 			if (leftBox) {
 				let start = leftVertex;
 				let end = point;
-				let length = start.clone().setZ(0).distanceTo(end.clone().setZ(0));
+				// let length = start.clone().setZ(0).distanceTo(end.clone().setZ(0));
+				let length = start.distanceTo(end);
 				leftBox.scale.set(length, 1000000, this.width);
-				leftBox.up.set(0, 0, 1);
+				// leftBox.up.set(0, 0, 1);
 
 				let center = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
-				let diff = new THREE.Vector3().subVectors(end, start);
-				let target = new THREE.Vector3(diff.y, -diff.x, 0);
+				// let diff = new THREE.Vector3().subVectors(end, start);
+				// let target = new THREE.Vector3(diff.y, -diff.x, 0);
+				// leftBox.position.set(0, 0, 0);
 
-				leftBox.position.set(0, 0, 0);
-				leftBox.lookAt(target);
 				leftBox.position.copy(center);
+				leftBox.quaternion.identity();
+				leftBox.lookAt(new THREE.Vector3());
+				leftBox.rotateX(-Math.PI * 0.5);
+
+				// if (leftBox.children.length == 0) {
+				// 	leftBox.add(new THREE.AxesHelper(5000));
+				// }
+
+				// if (leftBox.children.length == 1) {
+				// 	leftBox.add(new THREE.AxesHelper(500));
+				// }
+
+				leftBox.updateMatrixWorld(true);
+				const h = new THREE.Vector3().copy(end);
+				leftBox.worldToLocal(h);
+				// leftBox.children[1].position.copy(h);
+				if(!isNaN(h.x)) {
+					h.multiply(leftBox.scale);
+					const y = new THREE.Vector2(0, 1);
+					const d = new THREE.Vector2(h.z, h.x);
+					leftBox.rotateY(d.angle() + Math.PI * 0.5);
+				}
 			}
 
 			centroid.add(point);
@@ -299,7 +321,7 @@ export class Profile extends THREE.Object3D{
 		for (let i = 0; i < this.boxes.length; i++) {
 			let box = this.boxes[i];
 
-			box.position.z = min.z + (max.z - min.z) / 2;
+			// box.position.z = min.z + (max.z - min.z) / 2;
 		}
 	}
 
