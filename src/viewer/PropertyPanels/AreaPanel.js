@@ -15,6 +15,9 @@ export class AreaPanel extends MeasurePanel{
 				<span id="measurement_area"></span>
 
 				<!-- ACTIONS -->
+				<li style="display: grid; grid-template-columns: auto auto; grid-column-gap: 5px; margin-top: 10px">
+					<input id="area_export" type="button" value="export"/>
+				</li>
 				<div style="display: flex; margin-top: 12px">
 					<span></span>
 					<span style="flex-grow: 1"></span>
@@ -32,6 +35,11 @@ export class AreaPanel extends MeasurePanel{
 		this.propertiesPanel.addVolatileListener(measurement, "marker_removed", this._update);
 		this.propertiesPanel.addVolatileListener(measurement, "marker_moved", this._update);
 
+		this.elContent.find("#area_export").click(() => {
+			if (measurement.onExport) {
+				measurement.onExport();
+			}
+		});
 		this.update();
 	}
 
