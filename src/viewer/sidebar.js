@@ -258,19 +258,22 @@ export class Sidebar{
 		));
 
 		// ANNOTATION
-		elToolbar.append(this.createToolIcon(
-			Potree.resourcePath + '/icons/annotation.svg',
-			'[title]tt.annotation',
-			() => {
-				$('#menu_measurements').next().slideDown(); ;
-				let annotation = this.viewer.annotationTool.startInsertion();
-
-				let annotationsRoot = $("#jstree_scene").jstree().get_json("annotations");
-				let jsonNode = annotationsRoot.children.find(child => child.data.uuid === annotation.uuid);
-				$.jstree.reference(jsonNode.id).deselect_all();
-				$.jstree.reference(jsonNode.id).select_node(jsonNode.id);
-			}
-		));
+		
+		// THE FOLLOWING LINES ARE COMMENTED TO PREVENT DISPLAYING UNUSED OPTIONS IN TOOLBAR
+		
+		// elToolbar.append(this.createToolIcon(
+		// 	Potree.resourcePath + '/icons/annotation.svg',
+		// 	'[title]tt.annotation',
+		// 	() => {
+		// 		$('#menu_measurements').next().slideDown(); ;
+		// 		let annotation = this.viewer.annotationTool.startInsertion();
+		//
+		// 		let annotationsRoot = $("#jstree_scene").jstree().get_json("annotations");
+		// 		let jsonNode = annotationsRoot.children.find(child => child.data.uuid === annotation.uuid);
+		// 		$.jstree.reference(jsonNode.id).deselect_all();
+		// 		$.jstree.reference(jsonNode.id).select_node(jsonNode.id);
+		// 	}
+		// ));
 
 		// REMOVE ALL
 		elToolbar.append(this.createToolIcon(
@@ -1283,87 +1286,94 @@ export class Sidebar{
 			slide: (event, ui) => { this.viewer.setPointBudget(ui.value); }
 		});
 
-		this.dom.find('#sldFOV').slider({
-			value: this.viewer.getFOV(),
-			min: 20,
-			max: 100,
-			step: 1,
-			slide: (event, ui) => { this.viewer.setFOV(ui.value); }
-		});
-
-		$('#sldEDLRadius').slider({
-			value: this.viewer.getEDLRadius(),
-			min: 1,
-			max: 4,
-			step: 0.01,
-			slide: (event, ui) => { this.viewer.setEDLRadius(ui.value); }
-		});
-
-		$('#sldEDLStrength').slider({
-			value: this.viewer.getEDLStrength(),
-			min: 0,
-			max: 5,
-			step: 0.01,
-			slide: (event, ui) => { this.viewer.setEDLStrength(ui.value); }
-		});
-
-		$('#sldEDLOpacity').slider({
-			value: this.viewer.getEDLOpacity(),
-			min: 0,
-			max: 1,
-			step: 0.01,
-			slide: (event, ui) => { this.viewer.setEDLOpacity(ui.value); }
-		});
+		// THE FOLLOWING LINES ARE COMMENTED TO PREVENT DISPLAYING UNUSED OPTIONS IN TOOLBAR
+		
+		// this.dom.find('#sldFOV').slider({
+		// 	value: this.viewer.getFOV(),
+		// 	min: 20,
+		// 	max: 100,
+		// 	step: 1,
+		// 	slide: (event, ui) => { this.viewer.setFOV(ui.value); }
+		// });
+		//
+		// $('#sldEDLRadius').slider({
+		// 	value: this.viewer.getEDLRadius(),
+		// 	min: 1,
+		// 	max: 4,
+		// 	step: 0.01,
+		// 	slide: (event, ui) => { this.viewer.setEDLRadius(ui.value); }
+		// });
+		//
+		// $('#sldEDLStrength').slider({
+		// 	value: this.viewer.getEDLStrength(),
+		// 	min: 0,
+		// 	max: 5,
+		// 	step: 0.01,
+		// 	slide: (event, ui) => { this.viewer.setEDLStrength(ui.value); }
+		// });
+		//
+		// $('#sldEDLOpacity').slider({
+		// 	value: this.viewer.getEDLOpacity(),
+		// 	min: 0,
+		// 	max: 1,
+		// 	step: 0.01,
+		// 	slide: (event, ui) => { this.viewer.setEDLOpacity(ui.value); }
+		// });
 
 		this.viewer.addEventListener('point_budget_changed', (event) => {
 			$('#lblPointBudget')[0].innerHTML = Utils.addCommas(this.viewer.getPointBudget());
 			sldPointBudget.slider({value: this.viewer.getPointBudget()});
 		});
 
-		this.viewer.addEventListener('fov_changed', (event) => {
-			$('#lblFOV')[0].innerHTML = parseInt(this.viewer.getFOV());
-			$('#sldFOV').slider({value: this.viewer.getFOV()});
-		});
-
-		this.viewer.addEventListener('use_edl_changed', (event) => {
-			$('#chkEDLEnabled')[0].checked = this.viewer.getEDLEnabled();
-		});
-
-		this.viewer.addEventListener('edl_radius_changed', (event) => {
-			$('#lblEDLRadius')[0].innerHTML = this.viewer.getEDLRadius().toFixed(1);
-			$('#sldEDLRadius').slider({value: this.viewer.getEDLRadius()});
-		});
-
-		this.viewer.addEventListener('edl_strength_changed', (event) => {
-			$('#lblEDLStrength')[0].innerHTML = this.viewer.getEDLStrength().toFixed(1);
-			$('#sldEDLStrength').slider({value: this.viewer.getEDLStrength()});
-		});
-
-		this.viewer.addEventListener('background_changed', (event) => {
-			$("input[name=background][value='" + this.viewer.getBackground() + "']").prop('checked', true);
-		});
+		// THE FOLLOWING LINES ARE COMMENTED TO PREVENT DISPLAYING UNUSED OPTIONS IN TOOLBAR
+		
+		// this.viewer.addEventListener('fov_changed', (event) => {
+		// 	$('#lblFOV')[0].innerHTML = parseInt(this.viewer.getFOV());
+		// 	$('#sldFOV').slider({value: this.viewer.getFOV()});
+		// });
+		//
+		// this.viewer.addEventListener('use_edl_changed', (event) => {
+		// 	$('#chkEDLEnabled')[0].checked = this.viewer.getEDLEnabled();
+		// });
+		//
+		// this.viewer.addEventListener('edl_radius_changed', (event) => {
+		// 	$('#lblEDLRadius')[0].innerHTML = this.viewer.getEDLRadius().toFixed(1);
+		// 	$('#sldEDLRadius').slider({value: this.viewer.getEDLRadius()});
+		// });
+		//
+		// this.viewer.addEventListener('edl_strength_changed', (event) => {
+		// 	$('#lblEDLStrength')[0].innerHTML = this.viewer.getEDLStrength().toFixed(1);
+		// 	$('#sldEDLStrength').slider({value: this.viewer.getEDLStrength()});
+		// });
+		//
+		// this.viewer.addEventListener('background_changed', (event) => {
+		// 	$("input[name=background][value='" + this.viewer.getBackground() + "']").prop('checked', true);
+		// });
 
 		$('#lblPointBudget')[0].innerHTML = Utils.addCommas(this.viewer.getPointBudget());
-		$('#lblFOV')[0].innerHTML = parseInt(this.viewer.getFOV());
-		$('#lblEDLRadius')[0].innerHTML = this.viewer.getEDLRadius().toFixed(1);
-		$('#lblEDLStrength')[0].innerHTML = this.viewer.getEDLStrength().toFixed(1);
-		$('#chkEDLEnabled')[0].checked = this.viewer.getEDLEnabled();
 		
-		{
-			let elBackground = $(`#background_options`);
-			elBackground.selectgroup();
+		// THE FOLLOWING LINES ARE COMMENTED TO PREVENT DISPLAYING UNUSED OPTIONS IN TOOLBAR
+		
+		// $('#lblFOV')[0].innerHTML = parseInt(this.viewer.getFOV());
+		// $('#lblEDLRadius')[0].innerHTML = this.viewer.getEDLRadius().toFixed(1);
+		// $('#lblEDLStrength')[0].innerHTML = this.viewer.getEDLStrength().toFixed(1);
+		// $('#chkEDLEnabled')[0].checked = this.viewer.getEDLEnabled();
+		
+		// {
+		// 	let elBackground = $(`#background_options`);
+		// 	elBackground.selectgroup();
+		//
+		// 	elBackground.find("input").click( (e) => {
+		// 		this.viewer.setBackground(e.target.value);
+		// 	});
+		//
+		// 	let currentBackground = this.viewer.getBackground();
+		// 	$(`input[name=background_options][value=${currentBackground}]`).trigger("click");
+		// }
 
-			elBackground.find("input").click( (e) => {
-				this.viewer.setBackground(e.target.value);
-			});
-
-			let currentBackground = this.viewer.getBackground();
-			$(`input[name=background_options][value=${currentBackground}]`).trigger("click");
-		}
-
-		$('#chkEDLEnabled').click( () => {
-			this.viewer.setEDLEnabled($('#chkEDLEnabled').prop("checked"));
-		});
+		// $('#chkEDLEnabled').click( () => {
+		// 	this.viewer.setEDLEnabled($('#chkEDLEnabled').prop("checked"));
+		// });
 	}
 
 	initNavigation(){
